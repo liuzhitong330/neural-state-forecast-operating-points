@@ -1,33 +1,38 @@
-# When is a seizure forecast actionable?
+# Seizure forecasts at a shared false-positive-rate budget
 
-A reproducible trajectory project using the public source data from:
+An exploratory, participant-level analysis of public source data from Khambhati et al., *Nature Medicine* (2024).
 
-- Khambhati AN, Chang EF, Baud MO, Rao VR. *Hippocampal network activity forecasts epileptic seizures.* Nature Medicine 30, 2787–2790 (2024). DOI: 10.1038/s41591-024-03149-6.
-- `khambhati-lab/pub-2024-hippocampal-seizure-forecasting`, pinned to commit `fea1a8d282ebfb8545dfb4ad680897891b1428d4`.
+[Explore the interactive analysis](https://liuzhitong330.github.io/neural-state-forecast-operating-points/)
 
 ## Research question
 
-At a fixed false-positive-rate budget, how much 24-hour seizure sensitivity does a momentary hippocampal functional-connectivity forecast retain for each participant, and when should it be preferred to a multidien IEA-cycle forecast?
+At the same false-positive-rate budget, does a momentary hippocampal functional-connectivity forecast retain more seizure sensitivity than a multidien epileptiform-activity-cycle forecast—and does the answer differ between participants?
 
-## What the demo adds
+## What this project does
 
-The original paper reports cohort-level forecasting performance. This demo reconstructs participant-level monotone ROC envelopes and interpolates TPR at a shared FPR ceiling. It exposes model switching across people and provides a concrete starting point for patient-specific sensing thresholds.
+The interface compares published participant-level AUC values and reconstructs monotone ROC envelopes from released figure-source data. Selecting a participant and an FPR budget shows the interpolated sensitivity of the FC, IEA-cycle, and shuffled models.
 
-## Reproduce locally
+The aim is to make individual trade-offs inspectable and identify comparisons worth testing in a future longitudinal evaluation. This is a descriptive reanalysis, not a new trained forecasting model or a validated stimulation policy.
 
-The page fetches the two source CSVs directly from the pinned GitHub commit at runtime. Serve this directory over HTTP so the browser can load the remote data:
+## Data and attribution
+
+- Khambhati AN, Chang EF, Baud MO, Rao VR. *Hippocampal network activity forecasts epileptic seizures.* Nature Medicine 30, 2787–2790 (2024). [DOI: 10.1038/s41591-024-03149-6](https://doi.org/10.1038/s41591-024-03149-6).
+- Source repository: [khambhati-lab/pub-2024-hippocampal-seizure-forecasting](https://github.com/khambhati-lab/pub-2024-hippocampal-seizure-forecasting/tree/fea1a8d282ebfb8545dfb4ad680897891b1428d4), pinned to commit `fea1a8d282ebfb8545dfb4ad680897891b1428d4`.
+- Source files fetched by the public interface: `source-data/data-fig2c-auc.csv` and `source-data/data-figext7d-forecast-roc.csv`.
+
+The source data and original forecasting models belong to the study authors. This project adds a browser-based comparison; it does not claim a collaboration with or endorsement by the KNOT Lab.
+
+## Run locally
+
+Clone this repository, then run the following from its root:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000`.
+Open `http://localhost:8000/`. Internet access is required: the page fetches the two source CSVs directly from the pinned GitHub commit at runtime.
 
-The independent audit script in the parent project directory writes participant-level operating points at 5%, 10%, 20%, and 30% FPR and a JSON summary:
-
-```bash
-python3 ../analyze_forecasts.py
-```
+[app.js](app.js) contains the displayed calculations; [data.js](data.js) contains the source configuration. The public repository provides the browser workflow. A separate audit script referenced in an earlier README exists only in the original local workspace and is **not included in this repository**; it is not a prerequisite or a publicly available reproduction step.
 
 ## Method
 
@@ -37,7 +42,15 @@ python3 ../analyze_forecasts.py
 4. Linearly interpolate TPR at the selected FPR ceiling.
 5. Compare FC, IEA-cycle, and shuffled models at that common operating constraint.
 
-## Limits and data rights
+## Limitations
 
-The public repository provides figure-level source data, not raw RNS recordings or window-level predictions. FPR is not daily alert count, stimulation burden, calibration, or clinical benefit. The source repository does not include an explicit license file, so this project links to the pinned source and computes a minimal derived view rather than redistributing the raw data.
+- The inputs are figure-level source data, not raw RNS recordings or window-level predictions. This project does not retrain or reproduce the full forecasting pipeline.
+- Selecting the highest TPR at duplicate FPR values and applying a cumulative maximum can produce an optimistic summary. Interpolated operating points are descriptive approximations, not independently measured performance.
+- A false-positive rate is not a daily alert count, calibration measure, stimulation burden, or clinical benefit.
+- A participant's apparent model preference needs new, held-out longitudinal evaluation. This analysis does not establish an actionable clinical threshold or stimulation policy.
 
+## Data rights and project provenance
+
+The pinned source repository does not include an explicit license file. This project links to the original source and computes a minimal derived view rather than bundling the raw CSVs. Source access is not a blanket grant of redistribution rights; consult the original authors and applicable terms for reuse.
+
+This is a personal, public-data exploration developed with AI-assisted implementation. The browser interface and reanalysis are distinct from the original study, and do not establish hands-on neural-recording or clinical-stimulation experience.
